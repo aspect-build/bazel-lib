@@ -1,0 +1,13 @@
+version: 2.1
+
+workflows:
+  testing:
+    jobs:
+      - bazel-test
+jobs:
+  bazel-test:
+    machine: true
+    resource_class: aspect-build/default
+    steps:
+      - checkout
+      - run: bazel test //...
