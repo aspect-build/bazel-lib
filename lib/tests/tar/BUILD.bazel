@@ -165,6 +165,9 @@ sh_binary(
 tar(
     name = "tar_runfiles",
     srcs = [":cat_src_file"],
+    args = [
+        "--dereference",
+    ],
 )
 
 genrule(
