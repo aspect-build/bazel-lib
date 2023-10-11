@@ -36,7 +36,6 @@ _tar_attrs = {
     ),
     "mtree": attr.label(
         doc = "An mtree specification file",
-        allow_single_file = True,
         # Mandatory since it's the only way to set constant timestamps
         mandatory = True,
     ),
@@ -107,11 +106,10 @@ def _tar_impl(ctx):
 
     out = ctx.outputs.out or ctx.actions.declare_file(ctx.attr.name + ".tar")
     args.add("--file", out)
-    args.add("--format", "gnutar")
     args.add("-vv")
 
-    args.add(ctx.file.mtree, format = "@%s")
-    inputs.append(ctx.file.mtree)
+    args.add_all(ctx.files.mtree, format_each = "@%s")
+    inputs.extend(ctx.files.mtree)
 
     ctx.actions.run(
         executable = bsdtar.tarinfo.binary,
@@ -150,6 +148,10 @@ def _mtree_impl(ctx):
     content.set_param_file_format("multiline")
     content.add_all(ctx.files.srcs, map_each = _default_mtree_line)
 
+    rout = ctx.actions.declare_file(ctx.attr.name + ".runfiles.spec")
+    rcontent = ctx.actions.args()
+    rcontent.set_param_file_format("multiline")
+
     for s in ctx.attr.srcs:
         default_info = s[DefaultInfo]
         if not default_info.files_to_run.runfiles_manifest:
@@ -158,11 +160,13 @@ def _mtree_impl(ctx):
         runfiles_dir = _calculate_runfiles_dir(default_info)
         for file in depset(transitive = [s.default_runfiles.files]).to_list():
             destination = _runfile_path(ctx, file, runfiles_dir)
-            content.add(_mtree_line(destination, file.path, "file"))
+            rcontent.add(_mtree_line(destination, file.path, "file"))
 
     ctx.actions.write(out, content = content)
 
-    return DefaultInfo(files = depset([out]), runfiles = ctx.runfiles([out]))
+    ctx.actions.write(rout, content = rcontent)
+
+    return DefaultInfo(files = depset([out, rout]), runfiles = ctx.runfiles([out, rout]))
 
 tar_lib = struct(
     attrs = _tar_attrs,
