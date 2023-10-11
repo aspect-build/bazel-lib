@@ -108,6 +108,7 @@ def _tar_impl(ctx):
     out = ctx.outputs.out or ctx.actions.declare_file(ctx.attr.name + ".tar")
     args.add("--file", out)
     args.add("--format", "gnutar")
+    args.add("-vv")
 
     args.add(ctx.file.mtree, format = "@%s")
     inputs.append(ctx.file.mtree)
