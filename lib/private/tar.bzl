@@ -139,6 +139,7 @@ def _mtree_line(file, content, type, uid = "0", gid = "0", time = "1672560000", 
         "mode=" + mode,
         "type=" + type,
         # "nlink=1",
+        "device=native",
         "content=" + content,
     ])
 
