@@ -170,6 +170,9 @@ sh_binary(
 tar(
     name = "tar_runfiles",
     srcs = [":cat_src_file"],
+    args = [
+        "--dereference",
+    ],
 )
 
 genrule(
@@ -191,6 +194,19 @@ genrule(
         "//conditions:default": [],
     }),
     toolchains = ["@bsd_tar_toolchains//:resolved_toolchain"],
+)
+
+assert_tar_listing(
+    name = "test_runfiles_listing",
+    actual = "tar_runfiles",
+    expected = [
+        "-rwxr-xr-x  0 0      0         819 Jan  1  2023 lib/tests/tar/cat_src_file.sh",
+        "-rwxr-xr-x  0 0      0         819 Jan  1  2023 lib/tests/tar/cat_src_file",
+        "-rwxr-xr-x  0 0      0         819 Jan  1  2023 lib/tests/tar/cat_src_file.runfiles/aspect_bazel_lib/lib/tests/tar/cat_src_file.sh",
+        "-rwxr-xr-x  0 0      0         819 Jan  1  2023 lib/tests/tar/cat_src_file.runfiles/aspect_bazel_lib/lib/tests/tar/cat_src_file",
+        "-rwxr-xr-x  0 0      0          21 Jan  1  2023 lib/tests/tar/cat_src_file.runfiles/aspect_bazel_lib/lib/tests/tar/src_file",
+        "-rwxr-xr-x  0 0      0       17312 Jan  1  2023 lib/tests/tar/cat_src_file.runfiles/bazel_tools/tools/bash/runfiles/runfiles.bash",
+    ],
 )
 
 diff_test(
