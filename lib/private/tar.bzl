@@ -107,6 +107,7 @@ def _tar_impl(ctx):
 
     out = ctx.outputs.out or ctx.actions.declare_file(ctx.attr.name + ".tar")
     args.add("--file", out)
+    args.add("--format", "gnutar")
 
     args.add(ctx.file.mtree, format = "@%s")
     inputs.append(ctx.file.mtree)
@@ -136,7 +137,7 @@ def _mtree_line(file, content, type, uid = "0", gid = "0", time = "1672560000", 
         "time=" + time,
         "mode=" + mode,
         "type=" + type,
-        "nlink=1",
+        # "nlink=1",
         "content=" + content,
     ])
 
