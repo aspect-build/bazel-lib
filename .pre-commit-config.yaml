@@ -36,3 +36,12 @@ repos:
         exclude: &exclude_pattern "^(docs|e2e|lib/tests)/"
       - id: mixed-line-ending
       - id: trailing-whitespace
+  - repo: https://github.com/crate-ci/typos
+    rev: typos-dict-v0.11.2
+    hooks:
+      - id: typos
+        exclude: |
+          (?x)^(
+            docs/|
+            lib/
+          )

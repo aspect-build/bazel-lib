@@ -12,7 +12,7 @@ run:debug -- --node_options=--inspect-brk
 # Enable runfiles on all platforms. Runfiles are on by default on Linux and MacOS but off on
 # Windows.
 #
-# In general, rules_js and derivate rule sets assume that runfiles are enabled and do not support no
+# In general, rules_js and derivative rule sets assume that runfiles are enabled and do not support no
 # runfiles case because it does not scale to teach all Node.js tools to use the runfiles manifest.
 #
 # If you are developing on Windows, you must either run bazel with administrator privileges or

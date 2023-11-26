@@ -50,7 +50,7 @@ module "aspect_workflows" {
     default = {
       # Aspect Workflows requires machine types that have local SSD drives. See
       # https://cloud.google.com/compute/docs/machine-resource#machine_type_comparison for full list
-      # of machine types availble on GCP.
+      # of machine types available on GCP.
       machine_type    = "n1-standard-4"
       image_id        = data.google_compute_image.runner_image.id
       use_preemptible = true
