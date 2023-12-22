@@ -59,8 +59,8 @@ COREUTILS_VERSIONS = {
             "sha256": "sha256-aglIj5JvFGLm2ABwRzWAsZRTTD3X444V3GxHM9pGJS4=",
         },
         "linux_amd64": {
-            "filename": "coreutils-0.0.23-x86_64-unknown-linux-gnu.tar.gz",
-            "sha256": "sha256-u7OMW43Y46aXRRIKULfKdfUW51WJn6G70s5Xxwb6/1g=",
+            "filename": "coreutils-0.0.23-x86_64-unknown-linux-musl.tar.gz",
+            "sha256": "sha256-lZvDYhmmvsETKeJCJBsC4wYblJ2CRvqAVCs62UC1TdM="
         },
     },
 }
