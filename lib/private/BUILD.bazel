@@ -1,4 +1,10 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load(":windows_utils.bzl", "is_exec_platform_windows")
+
+is_exec_platform_windows(
+    name = "is_exec_platform_windows",
+    visibility = ["//visibility:public"],
+)
 
 exports_files(
     [
