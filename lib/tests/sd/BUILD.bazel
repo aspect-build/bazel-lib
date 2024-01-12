@@ -1,0 +1,19 @@
+load("//lib:testing.bzl", "assert_contains")
+
+genrule(
+    name = "sd",
+    srcs = [],
+    outs = ["sd.txt"],
+    cmd = """echo sed | $(SD_BIN) sed sd > $@""",
+    toolchains = ["@sd_toolchains//:resolved_toolchain"],
+)
+
+assert_contains(
+    name = "sd_ripgrep",
+    actual = "sd.txt",
+    expected = """sd""",
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+)
