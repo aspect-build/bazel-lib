@@ -79,6 +79,7 @@ Possible fixes:
         use_default_shell_env = ctx.attr.use_default_shell_env,
         env = dicts.add(ctx.configuration.default_shell_env, envs),
         input_manifests = tool_input_mfs,
+        toolchain = None,
     )
     return DefaultInfo(
         files = depset(outputs),

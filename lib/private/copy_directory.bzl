@@ -12,7 +12,8 @@ def copy_directory_bin_action(
         dst,
         copy_directory_bin,
         hardlink = "auto",
-        verbose = False):
+        verbose = False,
+        toolchain_type = "@aspect_bazel_lib//lib:copy_directory_toolchain_type"):
     """Factory function that creates an action to copy a directory from src to dst using a tool binary.
 
     The tool binary will typically be the `@aspect_bazel_lib//tools/copy_directory` `go_binary`
@@ -52,6 +53,7 @@ def copy_directory_bin_action(
         inputs = [src],
         outputs = [dst],
         executable = copy_directory_bin,
+        toolchain = toolchain_type,
         arguments = args,
         mnemonic = "CopyDirectory",
         progress_message = "Copying directory %s" % _progress_path(src),

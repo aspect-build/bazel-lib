@@ -52,6 +52,7 @@ def _expand_template_impl(ctx):
             outputs = [output],
             inputs = inputs,
             executable = expand_template_info.bin,
+            toolchain = "@aspect_bazel_lib//lib:expand_template_toolchain_type",
         )
     else:
         ctx.actions.expand_template(

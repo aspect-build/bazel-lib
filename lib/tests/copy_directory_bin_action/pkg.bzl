@@ -27,6 +27,7 @@ def _pkg_impl(ctx):
         copy_directory_bin = ctx.executable._tool,
         hardlink = "auto",
         verbose = True,
+        toolchain_type = None,
     )
 
     return [

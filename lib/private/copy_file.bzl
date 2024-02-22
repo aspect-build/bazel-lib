@@ -85,6 +85,7 @@ def copy_file_action(ctx, src, dst, dir_path = None):
 
     ctx.actions.run(
         executable = coreutils.bin,
+        toolchain = _COREUTILS_TOOLCHAIN,
         arguments = ["cp", src_path, dst.path],
         inputs = [src],
         outputs = [dst],

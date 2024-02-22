@@ -44,6 +44,7 @@ def _jq_impl(ctx):
         stamp_json = ctx.actions.declare_file("_%s_stamp.json" % ctx.label.name)
         ctx.actions.run_shell(
             tools = [jq_bin],
+            toolchain = "@aspect_bazel_lib//lib:jq_toolchain_type",
             inputs = [stamp.stable_status_file, stamp.volatile_status_file, ctx.file._parse_status_file_filter],
             outputs = [stamp_json],
             command = "{jq} -s -R -f {filter} {stable} {volatile} > {out}".format(
@@ -69,6 +70,7 @@ def _jq_impl(ctx):
 
     ctx.actions.run_shell(
         tools = [jq_bin],
+        toolchain = "@aspect_bazel_lib//lib:jq_toolchain_type",
         inputs = inputs,
         outputs = [out],
         command = cmd,

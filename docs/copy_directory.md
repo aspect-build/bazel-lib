@@ -42,7 +42,7 @@ for more context.
 ## copy_directory_bin_action
 
 <pre>
-copy_directory_bin_action(<a href="#copy_directory_bin_action-ctx">ctx</a>, <a href="#copy_directory_bin_action-src">src</a>, <a href="#copy_directory_bin_action-dst">dst</a>, <a href="#copy_directory_bin_action-copy_directory_bin">copy_directory_bin</a>, <a href="#copy_directory_bin_action-hardlink">hardlink</a>, <a href="#copy_directory_bin_action-verbose">verbose</a>)
+copy_directory_bin_action(<a href="#copy_directory_bin_action-ctx">ctx</a>, <a href="#copy_directory_bin_action-src">src</a>, <a href="#copy_directory_bin_action-dst">dst</a>, <a href="#copy_directory_bin_action-copy_directory_bin">copy_directory_bin</a>, <a href="#copy_directory_bin_action-hardlink">hardlink</a>, <a href="#copy_directory_bin_action-verbose">verbose</a>, <a href="#copy_directory_bin_action-toolchain_type">toolchain_type</a>)
 </pre>
 
 Factory function that creates an action to copy a directory from src to dst using a tool binary.
@@ -65,5 +65,6 @@ within other rule implementations.
 | <a id="copy_directory_bin_action-copy_directory_bin"></a>copy_directory_bin |  Copy to directory tool binary.   |  none |
 | <a id="copy_directory_bin_action-hardlink"></a>hardlink |  Controls when to use hardlinks to files instead of making copies.<br><br>See copy_directory rule documentation for more details.   |  <code>"auto"</code> |
 | <a id="copy_directory_bin_action-verbose"></a>verbose |  If true, prints out verbose logs to stdout   |  <code>False</code> |
+| <a id="copy_directory_bin_action-toolchain_type"></a>toolchain_type |  <p align="center"> - </p>   |  <code>"@aspect_bazel_lib//lib:copy_directory_toolchain_type"</code> |
 
 

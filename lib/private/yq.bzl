@@ -50,6 +50,7 @@ def _yq_impl(ctx):
         # create an action that gives a YAML representation of the stamp keys
         ctx.actions.run_shell(
             tools = [yq_bin],
+            toolchain = "@aspect_bazel_lib//lib:yq_toolchain_type",
             inputs = [stamp.stable_status_file, stamp.volatile_status_file, ctx.file._parse_status_file_expression],
             outputs = [stamp_yaml],
             command = "{yq} --from-file {expression} {stable} {volatile} > {out}".format(
@@ -86,6 +87,7 @@ def _yq_impl(ctx):
 
     ctx.actions.run_shell(
         tools = [yq_bin],
+        toolchain = "@aspect_bazel_lib//lib:yq_toolchain_type",
         inputs = inputs,
         outputs = outs,
         command = cmd,

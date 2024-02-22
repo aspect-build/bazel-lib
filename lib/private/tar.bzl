@@ -150,6 +150,7 @@ def _tar_impl(ctx):
 
     ctx.actions.run(
         executable = bsdtar.tarinfo.binary,
+        toolchain = "@aspect_bazel_lib//lib:tar_toolchain_type",
         inputs = depset(direct = inputs, transitive = [bsdtar.default.files] + [
             src[DefaultInfo].default_runfiles.files
             for src in ctx.attr.srcs

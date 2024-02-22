@@ -488,6 +488,7 @@ def copy_to_directory_bin_action(
         inputs = file_inputs + [config_file],
         outputs = [dst],
         executable = copy_to_directory_bin,
+        toolchain = "@aspect_bazel_lib//lib:copy_to_directory_toolchain_type",
         arguments = [config_file.path, ctx.label.workspace_name],
         mnemonic = "CopyToDirectory",
         progress_message = "Copying files to directory %s" % _progress_path(dst),
