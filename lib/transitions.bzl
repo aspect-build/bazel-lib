@@ -87,19 +87,28 @@ def _platform_transition_binary_impl(ctx):
 
     return result
 
+_platform_transition_attrs = {
+    "basename": attr.string(),
+    "binary": attr.label(allow_files = True, cfg = _transition_platform),
+    "target_platform": attr.label(
+        doc = "The target platform to transition the binary.",
+        mandatory = True,
+    ),
+    "_allowlist_function_transition": attr.label(
+        default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
+    ),
+}
+
 platform_transition_binary = rule(
     implementation = _platform_transition_binary_impl,
-    attrs = {
-        "basename": attr.string(),
-        "binary": attr.label(allow_files = True, cfg = _transition_platform),
-        "target_platform": attr.label(
-            doc = "The target platform to transition the binary.",
-            mandatory = True,
-        ),
-        "_allowlist_function_transition": attr.label(
-            default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
-        ),
-    },
+    attrs = _platform_transition_attrs,
     executable = True,
     doc = "Transitions the binary to use the provided platform.",
+)
+
+platform_transition_test = rule(
+    implementation = _platform_transition_binary_impl,
+    attrs = _platform_transition_attrs,
+    test = True,
+    doc = "Transitions the test to use the provided platform.",
 )
