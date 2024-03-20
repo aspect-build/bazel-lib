@@ -4,7 +4,7 @@ Users should *not* need to install these. If users see a load()
 statement from these, that's a bug in our distribution.
 """
 
-load("//lib:repositories.bzl", "register_bats_toolchains", "register_coreutils_toolchains", "register_jq_toolchains", "register_tar_toolchains", "register_yq_toolchains")
+load("//lib:repositories.bzl", "register_bats_toolchains", "register_coreutils_toolchains", "register_jq_toolchains", "register_ripgrep_toolchains", "register_sd_toolchains", "register_tar_toolchains", "register_yq_toolchains")
 load("//lib:utils.bzl", http_archive = "maybe_http_archive")
 
 # buildifier: disable=unnamed-macro
@@ -76,6 +76,8 @@ def bazel_lib_internal_deps():
 
     # Register toolchains for tests
     register_jq_toolchains()
+    register_ripgrep_toolchains()
+    register_sd_toolchains()
     register_yq_toolchains()
     register_coreutils_toolchains()
     register_tar_toolchains()

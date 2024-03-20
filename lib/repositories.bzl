@@ -7,6 +7,8 @@ load("//lib/private:copy_to_directory_toolchain.bzl", "COPY_TO_DIRECTORY_PLATFOR
 load("//lib/private:coreutils_toolchain.bzl", "COREUTILS_PLATFORMS", "coreutils_platform_repo", "coreutils_toolchains_repo", _DEFAULT_COREUTILS_VERSION = "DEFAULT_COREUTILS_VERSION")
 load("//lib/private:expand_template_toolchain.bzl", "EXPAND_TEMPLATE_PLATFORMS", "expand_template_platform_repo", "expand_template_toolchains_repo")
 load("//lib/private:jq_toolchain.bzl", "JQ_PLATFORMS", "jq_host_alias_repo", "jq_platform_repo", "jq_toolchains_repo", _DEFAULT_JQ_VERSION = "DEFAULT_JQ_VERSION")
+load("//lib/private:ripgrep_toolchain.bzl", "RIPGREP_PLATFORMS", "ripgrep_platform_repo", "ripgrep_toolchains_repo", _DEFAULT_RIPGREP_VERSION = "DEFAULT_RIPGREP_VERSION")
+load("//lib/private:sd_toolchain.bzl", "SD_PLATFORMS", "sd_platform_repo", "sd_toolchains_repo", _DEFAULT_SD_VERSION = "DEFAULT_SD_VERSION")
 load("//lib/private:source_toolchains_repo.bzl", "source_toolchains_repo")
 load("//lib/private:tar_toolchain.bzl", "BSDTAR_PLATFORMS", "bsdtar_binary_repo", "tar_toolchains_repo")
 load("//lib/private:yq_toolchain.bzl", "YQ_PLATFORMS", "yq_host_alias_repo", "yq_platform_repo", "yq_toolchains_repo", _DEFAULT_YQ_VERSION = "DEFAULT_YQ_VERSION")
@@ -49,6 +51,58 @@ def register_jq_toolchains(name = DEFAULT_JQ_REPOSITORY, version = DEFAULT_JQ_VE
     jq_host_alias_repo(name = name)
 
     jq_toolchains_repo(
+        name = "%s_toolchains" % name,
+        user_repository_name = name,
+    )
+
+DEFAULT_RIPGREP_REPOSITORY = "ripgrep"
+DEFAULT_RIPGREP_VERSION = _DEFAULT_RIPGREP_VERSION
+
+def register_ripgrep_toolchains(name = DEFAULT_RIPGREP_REPOSITORY, version = DEFAULT_RIPGREP_VERSION, register = True):
+    """Registers ripgrep (rg) toolchain and repositories
+
+    Args:
+        name: override the prefix for the generated toolchain repositories
+        version: the version of ripgrep to execute (see https://github.com/BurntSushi/ripgrep/releases)
+        register: whether to call through to native.register_toolchains.
+            Should be True for WORKSPACE users, but false when used under bzlmod extension
+    """
+    for [platform, meta] in RIPGREP_PLATFORMS.items():
+        ripgrep_platform_repo(
+            name = "%s_%s" % (name, platform),
+            platform = platform,
+            version = version,
+        )
+        if register:
+            native.register_toolchains("@%s_toolchains//:%s_toolchain" % (name, platform))
+
+    ripgrep_toolchains_repo(
+        name = "%s_toolchains" % name,
+        user_repository_name = name,
+    )
+
+DEFAULT_SD_REPOSITORY = "sd"
+DEFAULT_SD_VERSION = _DEFAULT_SD_VERSION
+
+def register_sd_toolchains(name = DEFAULT_SD_REPOSITORY, version = DEFAULT_SD_VERSION, register = True):
+    """Registers search & displace (sd) toolchain and repositories
+
+    Args:
+        name: override the prefix for the generated toolchain repositories
+        version: the version of sd to execute (see https://github.com/chmln/sd/releases)
+        register: whether to call through to native.register_toolchains.
+            Should be True for WORKSPACE users, but false when used under bzlmod extension
+    """
+    for [platform, meta] in SD_PLATFORMS.items():
+        sd_platform_repo(
+            name = "%s_%s" % (name, platform),
+            platform = platform,
+            version = version,
+        )
+        if register:
+            native.register_toolchains("@%s_toolchains//:%s_toolchain" % (name, platform))
+
+    sd_toolchains_repo(
         name = "%s_toolchains" % name,
         user_repository_name = name,
     )
@@ -322,6 +376,8 @@ def aspect_bazel_lib_register_toolchains():
     register_expand_template_toolchains()
     register_coreutils_toolchains()
     register_jq_toolchains()
+    register_ripgrep_toolchains()
+    register_sd_toolchains()
     register_yq_toolchains()
     register_tar_toolchains()
     register_bats_toolchains()
