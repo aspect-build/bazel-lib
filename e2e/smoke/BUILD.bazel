@@ -4,7 +4,7 @@ load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
 load("@aspect_bazel_lib//lib:diff_test.bzl", "diff_test")
 load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@aspect_bazel_lib//lib:jq.bzl", "jq")
-load("@aspect_bazel_lib//lib:tar.bzl", "tar")
+load("@aspect_bazel_lib//lib:tar.bzl", "mtree_spec", "tar")
 load("@aspect_bazel_lib//lib:yq.bzl", "yq")
 
 # Validate that JQ works and resolves its toolchain
@@ -91,6 +91,28 @@ tar(
     name = "tar_empty",
     srcs = [],
     mtree = [],
+)
+
+mtree_spec(
+    name = "testdata_mtree",
+    srcs = [":testdata_files"],
+)
+
+tar(
+    name = "testdata_tar",
+    srcs = [":testdata_files"],
+    mtree = [":testdata_mtree"],
+)
+
+filegroup(
+    name = "testdata_files",
+    srcs = glob(["testdata/**/*"]),
+)
+
+diff_test(
+    name = "mtree_golden_test",
+    file1 = ":testdata_mtree",
+    file2 = "testdata_mtree.spec.golden",
 )
 
 bats_test(

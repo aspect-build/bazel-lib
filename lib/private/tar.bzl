@@ -161,17 +161,15 @@ def _tar_impl(ctx):
     return DefaultInfo(files = depset([out]), runfiles = ctx.runfiles([out]))
 
 def _mtree_line(file, type, content = None, uid = "0", gid = "0", time = "1672560000", mode = "0755"):
-    spec = [
-        file,
-        "uid=" + uid,
-        "gid=" + gid,
-        "time=" + time,
-        "mode=" + mode,
-        "type=" + type,
-    ]
-    if content:
-        spec.append("content=" + content)
-    return " ".join(spec)
+    return json.encode(struct(
+        file = file,
+        uid = uid,
+        gid = gid,
+        time = time,
+        mode = mode,
+        type = type,
+        content = content,
+    ))
 
 # This function exactly same as the one from "@aspect_bazel_lib//lib:paths.bzl"
 # except that it takes workspace_name directly instead of the ctx object.
@@ -198,6 +196,7 @@ def _expand(file, expander, transform = to_repository_relative_path):
 
 def _mtree_impl(ctx):
     out = ctx.outputs.out or ctx.actions.declare_file(ctx.attr.name + ".spec")
+    json_out = ctx.actions.declare_file(out.basename + ".json", sibling = out)
 
     content = ctx.actions.args()
     content.set_param_file_format("multiline")
@@ -230,7 +229,40 @@ def _mtree_impl(ctx):
             allow_closure = True,
         )
 
-    ctx.actions.write(out, content = content)
+    ctx.actions.write(json_out, content = content)
+
+    jq_bin = ctx.toolchains["@aspect_bazel_lib//lib:jq_toolchain_type"].jqinfo.bin
+
+    ctx.actions.run_shell(
+        tools = [jq_bin],
+        inputs = [json_out],
+        outputs = [out],
+        command = """
+while IFS= read -r jsonl; do
+    file=$({jq} -r '.file' <<< "$jsonl")
+    gid=$({jq} -r '.gid' <<< "$jsonl")
+    uid=$({jq} -r '.uid' <<< "$jsonl")
+    time=$({jq} -r '.time' <<< "$jsonl")
+    mode=$({jq} -r '.mode' <<< "$jsonl")
+    type=$({jq} -r '.type' <<< "$jsonl")
+    content=$({jq} -r '.content' <<< "$jsonl")
+
+    file_encoded=$(echo -n "$file" | vis -wo)
+    mtree_line="$file_encoded uid=$uid gid=$gid time=$time mode=$mode type=$type"
+    if [ "$content" != "null" ]; then
+        content_encoded=$(echo -n "$content" | vis -wo)
+        mtree_line="$mtree_line content=$content_encoded"
+    fi
+
+    echo "$mtree_line" >> {output}
+done < {input}
+""".format(
+            jq = jq_bin.path,
+            input = json_out.path,
+            output = out.path,
+        ),
+        mnemonic = "MtreeSpec",
+    )
 
     return DefaultInfo(files = depset([out]), runfiles = ctx.runfiles([out]))
 

@@ -1,0 +1,4 @@
+testdata uid=0 gid=0 time=1672560000 mode=0755 type=dir
+testdata/file\040empty\040with\040spaces.txt uid=0 gid=0 time=1672560000 mode=0755 type=file content=testdata/file\040empty\040with\040spaces.txt
+testdata/file\040empty\040with\040\360\237\230\215.txt uid=0 gid=0 time=1672560000 mode=0755 type=file content=testdata/file\040empty\040with\040\360\237\230\215.txt
+testdata/file-empty.txt uid=0 gid=0 time=1672560000 mode=0755 type=file content=testdata/file-empty.txt
