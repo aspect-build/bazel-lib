@@ -342,3 +342,26 @@ assert_tar_listing(
         "drwxrwxrwt  0 0      0           0 Aug  3  2017 ./tmp/",
     ],
 )
+
+# Case 12: Special characters in filenames require running 'vis'
+mtree_spec(
+    name = "testdata_mtree",
+    srcs = [":testdata_files"],
+)
+
+tar(
+    name = "testdata_tar",
+    srcs = [":testdata_files"],
+    mtree = [":testdata_mtree"],
+)
+
+filegroup(
+    name = "testdata_files",
+    srcs = glob(["testdata/**/*"]),
+)
+
+diff_test(
+    name = "mtree_golden_test",
+    file1 = ":testdata_mtree",
+    file2 = "testdata_mtree.spec.golden",
+)

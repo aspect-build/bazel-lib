@@ -58,6 +58,7 @@ mtree_spec = rule(
     doc = "Create an mtree specification to map a directory hierarchy. See https://man.freebsd.org/cgi/man.cgi?mtree(8)",
     implementation = _tar_lib.mtree_implementation,
     attrs = _tar_lib.mtree_attrs,
+    toolchains = ["@aspect_bazel_lib//lib:jq_toolchain_type"],
 )
 
 tar_rule = _tar
