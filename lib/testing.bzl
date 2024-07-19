@@ -6,6 +6,7 @@ load("//lib:diff_test.bzl", "diff_test")
 load("//lib:jq.bzl", "jq")
 load("//lib:params_file.bzl", "params_file")
 load("//lib:utils.bzl", "default_timeout")
+load("//lib:paths.bzl", "BASH_RLOCATION_PREFIX")
 
 def assert_contains(name, actual, expected, size = None, timeout = None, **kwargs):
     """Generates a test target which fails if the file doesn't contain the string.
@@ -33,20 +34,21 @@ def assert_contains(name, actual, expected, size = None, timeout = None, **kwarg
     write_file(
         name = "_" + name,
         out = test_sh,
-        content = [
-            "#!/usr/bin/env bash",
+        content = BASH_RLOCATION_PREFIX + [
             "set -o errexit",
-            "grep --fixed-strings -f $1 $2",
+            "file1=$(rlocation $1)",
+            "file2=$(rlocation $2)",
+            "grep --fixed-strings -f $file1 $file2",
         ],
     )
 
     native.sh_test(
         name = name,
         srcs = [test_sh],
-        args = ["$(rootpath %s)" % expected_file, "$(rootpath %s)" % actual],
+        args = ["$(rlocationpath %s)" % expected_file, "$(rlocationpath %s)" % actual],
         size = size,
         timeout = default_timeout(size, timeout),
-        data = [actual, expected_file],
+        data = [actual, expected_file, "@bazel_tools//tools/bash/runfiles"],
         **kwargs
     )
 
@@ -172,12 +174,11 @@ def assert_archive_contains(name, archive, expected, type = None, **kwargs):
     write_file(
         name = script_name,
         out = "assert_{}.sh".format(name),
-        content = [
-            "#!/usr/bin/env bash",
+        content = BASH_RLOCATION_PREFIX + [
             "actual=$(mktemp)",
-            "{} $1 > $actual".format(command),
+            "{} $(rlocation $1) > $actual".format(command),
             "# Grep exits 1 if no matches, which is success for this test.",
-            "if {} $2; then".format(grep),
+            "if {} $(rlocation $2); then".format(grep),
             "  echo",
             "  echo 'ERROR: above line(s) appeared in {} but are not present in the archive' $1".format(expected_name),
             "  exit 1",
@@ -188,8 +189,8 @@ def assert_archive_contains(name, archive, expected, type = None, **kwargs):
     native.sh_test(
         name = name,
         srcs = [script_name],
-        args = ["$(rootpath %s)" % archive, "$(rootpath %s)" % expected_name],
-        data = [archive, expected_name],
+        args = ["$(rlocationpath %s)" % archive, "$(rlocationpath %s)" % expected_name],
+        data = [archive, expected_name, "@bazel_tools//tools/bash/runfiles"],
         timeout = "short",
         **kwargs
     )
@@ -225,14 +226,13 @@ def assert_directory_contains(name, directory, expected, **kwargs):
     write_file(
         name = script_name,
         out = "assert_{}.sh".format(name),
-        content = [
-            "#!/usr/bin/env bash",
+        content = BASH_RLOCATION_PREFIX + [
             "actual=$(mktemp)",
-            "pushd $1 > /dev/null",
+            "pushd $(rlocation $1) > /dev/null",
             "find . -type l,f | cut -b 3- > $actual",
             "popd > /dev/null",
             "# Grep exits 1 if no matches, which is success for this test.",
-            "if {} $2; then".format(grep),
+            "if {} $(rlocation $2); then".format(grep),
             "  echo",
             "  echo 'ERROR: above line(s) appeared in {} but are not present in the directory' $1".format(expected_name),
             "  exit 1",
@@ -243,8 +243,8 @@ def assert_directory_contains(name, directory, expected, **kwargs):
     native.sh_test(
         name = name,
         srcs = [script_name],
-        args = ["$(rootpath %s)" % directory, "$(rootpath %s)" % expected_name],
-        data = [directory, expected_name],
+        args = ["$(rlocationpath %s)" % directory, "$(rlocationpath %s)" % expected_name],
+        data = [directory, expected_name, "@bazel_tools//tools/bash/runfiles"],
         timeout = "short",
         **kwargs
     )

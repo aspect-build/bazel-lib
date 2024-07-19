@@ -47,12 +47,7 @@ pkg(
     out = "pkg",
     # RBE not happy with the symlinks in this test case
     tags = ["no-remote"],
-    target_compatible_with = select({
-        # D:/a/bazel-lib/bazel-lib/lib/tests/copy_to_directory_bin_action/BUILD.bazel:36:4:
-        # declared output 'lib/tests/copy_to_directory_bin_action/pkg_symlink_0' is not a symlink
-        "@platforms//os:windows": ["@platforms//:incompatible"],
-        "//conditions:default": [],
-    }),
+    # works on all platforms as long as symlinks are enabled (see .bazelrc)
     use_declare_symlink = select({
         "//lib/tests:allow_unresolved_symlinks": True,
         "//conditions:default": False,

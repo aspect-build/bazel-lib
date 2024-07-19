@@ -24,3 +24,16 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
   { echo>&2 "ERROR: runfiles.bash initializer cannot find $f. An executable rule may have forgotten to expose it in the runfiles, or the binary may require RUNFILES_DIR to be set."; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v3 ---
 """
+
+# Convenient helper for macros that generate bash scripts
+# Usage example:
+#    write_file(
+#        name = "_" + name,
+#        out = test_sh,
+#        content = BASH_RLOCATION_PREFIX + [
+#            "set -o errexit",
+#            "file=$(rlocation $1)",
+#            "grep foo $file",
+#        ],
+#    )
+BASH_RLOCATION_PREFIX = ["#!/usr/bin/env bash"] + BASH_RLOCATION_FUNCTION.split("\n")

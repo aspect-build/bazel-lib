@@ -1,36 +1,44 @@
 load("//lib:bats.bzl", "bats_test")
 
+# these tests can take over 60s when running in parallel on windows (I don't know why, something related to bats-core)
+
 bats_test(
     name = "basic",
-    size = "small",
+    size = "medium",
     srcs = [
         "basic.bats",
     ],
+    # timeout on windows if run at same time as other bats tests
+    tags = ["exclusive"],
 )
 
 bats_test(
     name = "env",
-    size = "small",
+    size = "medium",
     srcs = [
         "env.bats",
     ],
     env = {
         "USE_BAZEL_VERSION": "latest",
     },
+    # timeout on windows if run at same time as other bats tests
+    tags = ["exclusive"],
 )
 
 bats_test(
     name = "args",
-    size = "small",
+    size = "medium",
     srcs = [
         "basic.bats",
     ],
     args = ["--timing"],
+    # timeout on windows if run at same time as other bats tests
+    tags = ["exclusive"],
 )
 
 bats_test(
     name = "env_expansion",
-    size = "small",
+    size = "medium",
     srcs = [
         "env_expansion.bats",
     ],
@@ -40,11 +48,17 @@ bats_test(
     env = {
         "DATA_PATH": "$(location :data.bin)",
     },
+    # bats does not find data if runfiles are disabled
+    target_compatible_with = select({
+        # incompatible with --noenable_runfiles
+        "@aspect_bazel_lib//lib:enable_runfiles": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 bats_test(
     name = "additional_lib",
-    size = "small",
+    size = "medium",
     srcs = [
         "additional_lib.bats",
     ],

@@ -8,6 +8,9 @@ import %workspace%/.aspect/bazelrc/performance.bazelrc
 
 ### YOUR PROJECT SPECIFIC OPTIONS GO HERE ###
 
+# symlinks on windows are required by some tests
+startup --windows_enable_symlinks
+
 # For testing our --stamp behavior.
 # Normally users would use a --workspace_status_command with a script that calls `git describe`.
 common --embed_label=v1.2.3

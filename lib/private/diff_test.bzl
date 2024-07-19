@@ -23,6 +23,8 @@ command (fc.exe) on Windows (no Bash is required).
 
 load("//lib:utils.bzl", "default_timeout")
 load(":directory_path.bzl", "DirectoryPathInfo")
+load("//lib:windows_utils.bzl", "BATCH_RLOCATION_FUNCTION")
+load("//lib:paths.bzl", "BASH_RLOCATION_FUNCTION", "to_rlocation_path")
 
 def _runfiles_path(f):
     if f.root.path:
@@ -35,21 +37,21 @@ def _diff_test_impl(ctx):
 
     if DirectoryPathInfo in ctx.attr.file1:
         file1 = ctx.attr.file1[DirectoryPathInfo].directory
-        file1_path = "/".join([_runfiles_path(file1), ctx.attr.file1[DirectoryPathInfo].path])
+        file1_path = "/".join([to_rlocation_path(ctx, file1), ctx.attr.file1[DirectoryPathInfo].path])
     else:
         if len(ctx.files.file1) != 1:
             fail("file1 must be a single file or a target that provides a DirectoryPathInfo")
         file1 = ctx.files.file1[0]
-        file1_path = _runfiles_path(file1)
+        file1_path = to_rlocation_path(ctx, file1)
 
     if DirectoryPathInfo in ctx.attr.file2:
         file2 = ctx.attr.file2[DirectoryPathInfo].directory
-        file2_path = "/".join([_runfiles_path(file2), ctx.attr.file2[DirectoryPathInfo].path])
+        file2_path = "/".join([to_rlocation_path(ctx, file2), ctx.attr.file2[DirectoryPathInfo].path])
     else:
         if len(ctx.files.file2) != 1:
             fail("file2 must be a single file or a target that provides a DirectoryPathInfo")
         file2 = ctx.files.file2[0]
-        file2_path = _runfiles_path(file2)
+        file2_path = to_rlocation_path(ctx, file2)
 
     if file1 == file2:
         msg = "diff_test comparing the same file %s" % file1
@@ -58,9 +60,11 @@ def _diff_test_impl(ctx):
     if is_windows:
         test_suffix = "-test.bat"
         template = ctx.file._diff_test_tmpl_bat
+        rlocation_function = BATCH_RLOCATION_FUNCTION
     else:
         test_suffix = "-test.sh"
         template = ctx.file._diff_test_tmpl_sh
+        rlocation_function = BASH_RLOCATION_FUNCTION
 
     test_bin = ctx.actions.declare_file(ctx.label.name + test_suffix)
     ctx.actions.expand_template(
@@ -71,6 +75,7 @@ def _diff_test_impl(ctx):
             "{fail_msg}": ctx.attr.failure_message,
             "{file1}": file1_path,
             "{file2}": file2_path,
+            "{rlocation_function}": rlocation_function,
             "{build_file_path}": ctx.build_file_path,
         },
         is_executable = True,
@@ -79,7 +84,7 @@ def _diff_test_impl(ctx):
     return DefaultInfo(
         executable = test_bin,
         files = depset(direct = [test_bin]),
-        runfiles = ctx.runfiles(files = [test_bin, file1, file2]),
+        runfiles = ctx.runfiles(files = [test_bin, file1, file2] + ctx.files._bash_runfiles),
     )
 
 _diff_test = rule(
@@ -101,6 +106,9 @@ _diff_test = rule(
         "_diff_test_tmpl_bat": attr.label(
             default = ":diff_test_tmpl.bat",
             allow_single_file = True,
+        ),
+        "_bash_runfiles": attr.label(
+            default = Label("@bazel_tools//tools/bash/runfiles"),
         ),
     },
     test = True,

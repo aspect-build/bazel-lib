@@ -156,7 +156,10 @@ sh_test(
     name = "case_6_test",
     timeout = "short",
     srcs = ["case6.sh"],
-    data = ["case_6"],
+    data = [
+        "case_6",
+        "@bazel_tools//tools/bash/runfiles",
+    ],
 )
 
 # Case 7: default settings

@@ -34,6 +34,15 @@ platform(
     ],
 )
 
+platform(
+    name = "x86_64_windows",
+    constraint_values = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+        "@io_bazel_rules_go//go/toolchain:cgo_off",  # https://github.com/bazelbuild/rules_go/pull/3390
+    ],
+)
+
 config_setting(
     name = "is_x86",
     constraint_values = [
@@ -117,6 +126,12 @@ go_binary(
 go_test(
     name = "test_transition_test",
     srcs = ["simple_test.go"],
+    target_compatible_with = select({
+        # incompatible with --noenable_runfiles
+        # test harness says: panic: could not change to test directory
+        "@aspect_bazel_lib//lib:enable_runfiles": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 platform_transition_binary(
@@ -131,64 +146,101 @@ platform_transition_binary(
     target_platform = "arm64_linux",
 )
 
+platform_transition_binary(
+    name = "transitioned_go_binary_x86_64_windows",
+    binary = ":test_transition_binary",
+    target_platform = "x86_64_windows",
+)
+
 platform_transition_test(
     name = "transitioned_go_test_x86_64",
     binary = ":test_transition_test",
     # only run this test on x86_64 platforms
     target_compatible_with = [
         "@platforms//cpu:x86_64",
-    ],
+        "@platforms//os:linux",
+    ] + select({
+        # incompatible with --noenable_runfiles
+        # test harness says: panic: could not change to test directory
+        "@aspect_bazel_lib//lib:enable_runfiles": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     target_platform = "x86_64_linux",
 )
 
 platform_transition_test(
     name = "transitioned_go_test_arm64",
     binary = ":test_transition_test",
-    # only run this test on arm64 platforms
+    # only run this test on arm64 platformsd
     target_compatible_with = [
         "@platforms//cpu:arm64",
+        "@platforms//os:linux",
     ],
     target_platform = "arm64_linux",
+)
+
+platform_transition_test(
+    name = "transitioned_go_test_x86_64_windows",
+    size = "small",
+    binary = ":test_transition_test",
+    # only run this test on x86_64 windows platforms
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
+    target_platform = "x86_64_windows",
 )
 
 sh_test(
     name = "test_go_binary_is_x86_64",
     srcs = ["test_file_type_contains.sh"],
     args = [
-        "$(rootpath :transitioned_go_binary_x86_64)",
+        "$(rlocationpath :transitioned_go_binary_x86_64)",
         "x86-64",
     ],
-    data = [":transitioned_go_binary_x86_64"],
+    data = [
+        ":transitioned_go_binary_x86_64", 
+        "@bazel_tools//tools/bash/runfiles"
+    ],
 )
 
 sh_test(
     name = "test_go_binary_is_arm64",
     srcs = ["test_file_type_contains.sh"],
     args = [
-        "$(rootpath :transitioned_go_binary_arm64)",
+        "$(rlocationpath :transitioned_go_binary_arm64)",
         "aarch64",
     ],
-    data = [":transitioned_go_binary_arm64"],
+    data = [
+        ":transitioned_go_binary_arm64", 
+        "@bazel_tools//tools/bash/runfiles"
+    ],
 )
 
 sh_test(
     name = "test_go_test_is_x86_64",
     srcs = ["test_file_type_contains.sh"],
     args = [
-        "$(rootpath :transitioned_go_test_x86_64)",
+        "$(rlocationpath :transitioned_go_test_x86_64)",
         "x86-64",
     ],
-    data = [":transitioned_go_test_x86_64"],
+    data = [
+        ":transitioned_go_test_x86_64", 
+        "@bazel_tools//tools/bash/runfiles"
+    ],
 )
 
 sh_test(
     name = "test_go_test_is_arm64",
     srcs = ["test_file_type_contains.sh"],
     args = [
-        "$(rootpath :transitioned_go_test_arm64)",
+        "$(rlocationpath :transitioned_go_test_arm64)",
         "aarch64",
     ],
-    data = [":transitioned_go_test_arm64"],
+    data = [
+        ":transitioned_go_test_arm64", 
+        "@bazel_tools//tools/bash/runfiles"
+    ],
 )
 
 go_library(
