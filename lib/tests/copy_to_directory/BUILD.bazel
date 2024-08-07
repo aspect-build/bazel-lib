@@ -152,6 +152,10 @@ copy_to_directory(
     include_external_repositories = ["external_test_repo"],
 )
 
+# TODO: This test is a false positive. sh_test always includes default
+# outputs in runfiles, so even if copy_to_directory did not add its output
+# to its runfiles this test would still pass.
+# See https://github.com/bazelbuild/bazel/issues/4519.
 sh_test(
     name = "case_6_test",
     timeout = "short",

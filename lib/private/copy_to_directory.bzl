@@ -51,6 +51,7 @@ _copy_to_directory_attr_doc = {
 
 If not set, the name of the target is used.
 """,
+    "add_directory_to_runfiles": """Whether to add the outputted directory to the target's runfiles. Defaults to True.""",
     # root_paths
     "root_paths": """List of paths (with glob support) that are roots in the output directory.
 
@@ -219,6 +220,12 @@ _copy_to_directory_attr = {
     "out": attr.string(
         doc = _copy_to_directory_attr_doc["out"],
     ),
+    # TODO(3.0): Remove this attribute and do not add directory to runfiles by default.
+    # https://github.com/aspect-build/bazel-lib/issues/748
+    "add_directory_to_runfiles": attr.bool(
+        default = True,
+        doc = _copy_to_directory_attr_doc["add_directory_to_runfiles"],
+    ),
     "root_paths": attr.string_list(
         default = ["."],
         doc = _copy_to_directory_attr_doc["root_paths"],
@@ -288,10 +295,12 @@ def _copy_to_directory_impl(ctx):
         verbose = ctx.attr.verbose,
     )
 
+    runfiles = ctx.runfiles([dst]) if ctx.attr.add_directory_to_runfiles else None
+
     return [
         DefaultInfo(
             files = depset([dst]),
-            runfiles = ctx.runfiles([dst]),
+            runfiles = runfiles,
         ),
     ]
 
