@@ -30,7 +30,7 @@ def _expand_locations(ctx, s):
     return expand_locations(ctx, s, targets = ctx.attr.data).split(" ")
 
 def _jq_impl(ctx):
-    jq_bin = ctx.toolchains["@aspect_bazel_lib//lib:jq_toolchain_type"].jqinfo.bin
+    jq_bin = ctx.toolchains["@aspect_bazel_lib//lib:jq_toolchain_type"].binary_info.bin[DefaultInfo].files_to_run.executable
 
     out = ctx.outputs.out or ctx.actions.declare_file(ctx.attr.name + ".json")
     if ctx.attr.expand_args:

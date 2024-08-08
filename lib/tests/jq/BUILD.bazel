@@ -164,6 +164,20 @@ diff_test(
     file2 = "a_pretty.json",
 )
 
+genrule(
+    name = "case_genrule_tool",
+    srcs = ["a.json"],
+    outs = ["genrule_tool_output.json"],
+    cmd = "$(execpath @jq_toolchains//:resolved_binary) '.' $(location a.json) > $@",
+    tools = ["@jq_toolchains//:resolved_binary"],
+)
+
+diff_test(
+    name = "case_genrule_tool_test",
+    file1 = "genrule_tool_output.json",
+    file2 = "a_pretty.json",
+)
+
 # Raw input (--raw-input / -R)
 jq(
     name = "case_raw_input",
