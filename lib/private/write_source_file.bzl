@@ -12,6 +12,19 @@ WriteSourceFileInfo = provider(
     },
 )
 
+def _prepare_out_file(out_file, check_that_out_file_exists):
+    out_file_label = utils.to_label(out_file)
+
+    if utils.is_external_label(out_file_label):
+        msg = "out file {} must be in the user workspace".format(out_file_label)
+        fail(msg)
+
+    if check_that_out_file_exists and out_file_label.package != native.package_name():
+        msg = "out file {} (in package '{}') must be a source file within the target's package: '{}'; set check_that_out_file_exists to False to work-around this requirement".format(out_file_label, out_file_label.package, native.package_name())
+        fail(msg)
+
+    return str(out_file)
+
 def write_source_file(
         name,
         in_file = None,
@@ -21,6 +34,7 @@ def write_source_file(
         suggested_update_target = None,
         diff_test = True,
         check_that_out_file_exists = True,
+        out_file_is_select = False,
         **kwargs):
     """Write a file or directory to the source tree.
 
@@ -65,22 +79,19 @@ def write_source_file(
     if in_file:
         if not out_file:
             fail("out_file must be specified if in_file is set")
-
-    if out_file:
-        out_file = utils.to_label(out_file)
-
-        if utils.is_external_label(out_file):
-            msg = "out file {} must be in the user workspace".format(out_file)
-            fail(msg)
-
-        if check_that_out_file_exists and out_file.package != native.package_name():
-            msg = "out file {} (in package '{}') must be a source file within the target's package: '{}'; set check_that_out_file_exists to False to work-around this requirement".format(out_file, out_file.package, native.package_name())
-            fail(msg)
+  
+    if out_file: 
+        if out_file_is_select:
+            for key, value in out_file.items():
+                out_file[key] = _prepare_out_file(value, check_that_out_file_exists)
+            out_file = select(out_file)
+        else:
+            out_file = _prepare_out_file(out_file, check_that_out_file_exists)
 
     _write_source_file(
         name = name,
         in_file = in_file,
-        out_file = str(out_file) if out_file else None,
+        out_file = out_file if out_file else None,
         executable = executable,
         additional_update_targets = additional_update_targets,
         **kwargs
@@ -89,7 +100,7 @@ def write_source_file(
     if not in_file or not out_file or not diff_test:
         return None
 
-    out_file_missing = check_that_out_file_exists and _is_file_missing(out_file)
+    out_file_missing = check_that_out_file_exists and not out_file_is_select and _is_file_missing(out_file)
     test_target_name = "%s_test" % name
 
     if out_file_missing:
