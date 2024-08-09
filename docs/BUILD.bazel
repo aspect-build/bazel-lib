@@ -161,6 +161,11 @@ stardoc_with_diff_test(
     bzl_library_target = "//lib:resource_sets",
 )
 
+stardoc_with_diff_test(
+    name = "extension_utils",
+    bzl_library_target = "//lib:extension_utils",
+)
+
 update_docs(
     tags = ["skip-on-bazel6"],
 )

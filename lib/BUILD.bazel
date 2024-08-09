@@ -136,6 +136,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "extension_utils",
+    srcs = ["extension_utils.bzl"],
+    deps = ["//lib/private:extension_utils"],
+)
+
+bzl_library(
     name = "output_files",
     srcs = ["output_files.bzl"],
     deps = ["//lib/private:output_files"],
