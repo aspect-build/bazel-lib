@@ -29,6 +29,7 @@ Remove a field from `package.json`:
 jq(
     name = "no_dev_deps",
     srcs = ["package.json"],
+    out = "package.json",
     filter = "del(.devDependencies)",
 )
 ```
