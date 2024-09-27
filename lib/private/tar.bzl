@@ -111,20 +111,6 @@ def _add_compression_args(compress, args):
     if compress == "zstd":
         args.add("--zstd")
 
-def _calculate_runfiles_dir(default_info):
-    manifest = default_info.files_to_run.runfiles_manifest
-
-    # Newer versions of Bazel put the manifest besides the runfiles with the suffix .runfiles_manifest.
-    # For example, the runfiles directory is named my_binary.runfiles then the manifest is beside the
-    # runfiles directory and named my_binary.runfiles_manifest
-    # Older versions of Bazel put the manifest file named MANIFEST in the runfiles directory
-    # See similar logic:
-    # https://github.com/aspect-build/rules_js/blob/c50bd3f797c501fb229cf9ab58e0e4fc11464a2f/js/private/bash.bzl#L63
-    if manifest.short_path.endswith("_manifest") or manifest.short_path.endswith("/MANIFEST"):
-        # Trim last 9 characters, as that's the length in both cases
-        return manifest.short_path[:-9]
-    fail("manifest path {} seems malformed".format(manifest.short_path))
-
 def _tar_impl(ctx):
     bsdtar = ctx.toolchains[TAR_TOOLCHAIN_TYPE]
     inputs = ctx.files.srcs[:]
@@ -224,10 +210,11 @@ def _mtree_impl(ctx):
 
     for s in ctx.attr.srcs:
         default_info = s[DefaultInfo]
-        if not default_info.files_to_run.runfiles_manifest:
+        if not default_info.files_to_run.executable:
             continue
 
-        runfiles_dir = _calculate_runfiles_dir(default_info)
+        # Expect a .runfiles directory for each executable.
+        runfiles_dir = default_info.files_to_run.executable.short_path + ".runfiles"
 
         # copy workspace name here just in case to prevent ctx
         # to be transferred to execution phase.
