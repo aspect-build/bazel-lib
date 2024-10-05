@@ -41,6 +41,10 @@ toolchain_type(
 )
 
 toolchain_type(
+    name = "jq_runtime_toolchain_type",
+)
+
+toolchain_type(
     name = "yq_toolchain_type",
 )
 
