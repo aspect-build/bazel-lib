@@ -3,7 +3,7 @@ load("@aspect_bazel_lib//lib:diff_test.bzl", "diff_test")
 load("@aspect_bazel_lib//lib:tar.bzl", "mtree_mutate", "mtree_spec", "tar")
 load("@aspect_bazel_lib//lib:testing.bzl", "assert_archive_contains")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load(":asserts.bzl", "assert_tar_listing")
+load(":asserts.bzl", "assert_tar_listing", "assert_unused_listing")
 
 # The examples below work with both source files and generated files.
 # Here we generate a file to use in the examples.
@@ -412,4 +412,56 @@ diff_test(
     name = "test14",
     file1 = ":strip_prefix14",
     file2 = "expected14.mtree",
+)
+
+#############
+# Example 15: mtree subsetting and unused-input pruning.
+
+copy_directory(
+    name = "unused_srcdir",
+    src = "srcdir",
+    out = "unused",
+)
+
+mtree_spec(
+    name = "mtree15",
+    srcs = [
+        ":treeartifact",
+    ],
+)
+
+tar(
+    name = "tar15",
+    srcs = [
+        "treeartifact",
+        ":mtree15",  # Not in output archive, but cannot be pruned.
+        ":unused_srcdir",
+    ],
+    out = "15.tar",
+    compute_unused_inputs = 1,
+    mtree = ":mtree15",
+)
+
+assert_tar_listing(
+    name = "test_unused_inputs_ignored",
+    actual = ":tar15",
+    expected = [
+        "drwxr-xr-x  0 0      0           0 Jan  1  2023 lib/",
+        "drwxr-xr-x  0 0      0           0 Jan  1  2023 lib/tests/",
+        "drwxr-xr-x  0 0      0           0 Jan  1  2023 lib/tests/tar/",
+        "drwxr-xr-x  0 0      0           0 Jan  1  2023 lib/tests/tar/treeartifact/",
+        "-rwxr-xr-x  0 0      0           0 Jan  1  2023 lib/tests/tar/treeartifact/info",
+        "-rwxr-xr-x  0 0      0           0 Jan  1  2023 lib/tests/tar/treeartifact/pkg",
+        "-rwxr-xr-x  0 0      0           1 Jan  1  2023 lib/tests/tar/treeartifact/space in name.txt",
+    ],
+)
+
+assert_unused_listing(
+    name = "test_unused_inputs_listed",
+    actual = ":tar15",
+    expected = [
+        "lib/tests/tar/unused/info",
+        "lib/tests/tar/unused/pkg",
+        "lib/tests/tar/unused/space in name.txt",
+    ],
 )
