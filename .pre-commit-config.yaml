@@ -19,7 +19,7 @@ repos:
         args: ["--warnings=-canonical-repository,-external-path"]
   # Enforce that commit messages allow for later changelog generation
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.17.0
+    rev: v4.18.1
     hooks:
       # Requires that commitizen is already installed
       - id: commitizen
